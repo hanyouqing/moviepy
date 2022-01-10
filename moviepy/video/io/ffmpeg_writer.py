@@ -117,6 +117,9 @@ class FFMPEG_VideoWriter:
             "-an",
             "-i",
             "-",
+            '-c:v', 'copy',
+            '-c:a', 'copy',
+
         ]
         if audiofile is not None:
             cmd.extend(["-i", audiofile, "-acodec", "copy"])
@@ -137,6 +140,8 @@ class FFMPEG_VideoWriter:
             {"stdout": sp.DEVNULL, "stderr": logfile, "stdin": sp.PIPE}
         )
 
+        logger = proglog.default_bar_logger(logger)
+        logger(message='Command: %s ' % ' '.join(cmd))
         self.proc = sp.Popen(cmd, **popen_params)
 
     def write_frame(self, img_array):

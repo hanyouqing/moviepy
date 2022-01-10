@@ -1,0 +1,18 @@
+version: "3"
+
+services: 
+  moviepy:
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    container_name: moviepy
+    hostname: moviepy
+    image: moviepy:jupyter
+    environment: 
+      - IMAGEMAGICK_BINARY=/usr/bin/convert
+      - FFMPEG_BINARY=/usr/bin/ffmpeg
+    volumes: 
+      - ./code:/code
+    # command: /bin/sleep infinity
+    command: jupyter notebook --ip=0.0.0.0 --port=8888 --allow-root
+

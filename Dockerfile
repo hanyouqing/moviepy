@@ -1,20 +1,28 @@
 FROM python:3
+ENV LC_ALL=C.UTF-8 \
+    IMAGEMAGICK_BINARY=/usr/bin/convert \
+    FFMPEG_BINARY=/usr/bin/ffmpeg
 
-# Install numpy using system package manager
-RUN apt-get -y update && apt-get -y install ffmpeg imagemagick
+RUN apt-get -y update && apt-get -y install --no-install-recommends \
+    ffmpeg \
+    imagemagick \
+    fonts-liberation  
 
-# Install some special fonts we use in testing, etc..
-RUN apt-get -y install fonts-liberation
-
-RUN apt-get install -y locales && \
+RUN apt-get -y install locales && \
     locale-gen C.UTF-8 && \
     /usr/sbin/update-locale LANG=C.UTF-8
 
-ENV LC_ALL C.UTF-8
+RUN apt-get dist-upgrade -y
 
 ADD . /var/src/moviepy/
-#RUN git clone https://github.com/Zulko/moviepy.git /var/src/moviepy
-RUN cd /var/src/moviepy/ && pip install .[optional]
+WORKDIR /var/src/moviepy/
+RUN pip install .[optional] && \
+    jupyter \
+    ipywidgets
+RUN apt-get clean all && apt-get autoremove && rm -rf /var/lib/apt/lists/* /root/.cache/
 
+# https://jupyter.org/install.html
 # modify ImageMagick policy file so that Textclips work correctly.
 RUN sed -i 's/none/read,write/g' /etc/ImageMagick-6/policy.xml 
+CMD jupyter nbextension enable --py --sys-prefix widgetsnbextension
+# CMD jupyter notebook --ip=0.0.0.0 --port=8888 --allow-root
